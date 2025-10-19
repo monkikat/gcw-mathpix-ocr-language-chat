@@ -6,12 +6,11 @@ A minimal, fast, and accessibility‑first language practice app that turns real
 
 ---
 
-## ✨ Why PolyPix?
+## Why PolyPix?
 
 Reading a photo is easy; practicing natural conversation from it is not. PolyPix bridges that gap:
 
 * **See → Understand → Practice** in one flow
-* Adapts difficulty and tone to the learner’s comfort
 * Designed to work well with assistive tech and low‑friction inputs
 
 ---
