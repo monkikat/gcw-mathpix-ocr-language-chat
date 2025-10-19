@@ -6,6 +6,7 @@ import { TranscribedText } from '@/types';
 import { ChatMessage } from '../components/ChatMessage';
 import { TextToSpeechPlayer } from '../utils/textToSpeech';
 import 'katex/dist/katex.min.css';
+import { useRouter } from 'next/navigation';
 
 function ScriptModeContent() {
   const searchParams = useSearchParams();
@@ -13,6 +14,7 @@ function ScriptModeContent() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const ttsPlayerRef = useRef<TextToSpeechPlayer | null>(null);
+  const router = useRouter();
 
   // Initialize TTS player
   useEffect(() => {
@@ -113,7 +115,8 @@ function ScriptModeContent() {
               {error && (
                 <p className="text-red-500 text-sm max-w-xs text-right">{error}</p>
               )}
-              <button className='px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded'>
+              <button onClick={() => router.push('/chat_mode')}
+              className='px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded'>
                 Chat Mode
               </button>
               <button className='px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded'>

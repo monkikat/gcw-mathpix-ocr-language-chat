@@ -11,3 +11,8 @@ export interface MessageType {
     fileName?: string;
     fileType?: string;
 };
+
+export interface ChatMessage {
+    role: 'user' | 'assistant';
+    content: string;
+};
