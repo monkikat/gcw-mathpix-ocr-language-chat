@@ -4,6 +4,8 @@ import { useRef, useState } from "react";
 import { useRouter } from 'next/navigation';
 import { TranscribedText } from '@/types';
 import { processOCR } from "../utils/ocrProcessor";
+import Image from 'next/image';
+import uploadIcon from '../src/uploadIcon.svg';
 
 
 const UploadComponent = () => {
@@ -77,38 +79,55 @@ const UploadComponent = () => {
     
     
   return (
-    <div className="h-fit w-fit">
-        <div className="flex gap-2">
-        <input
-          ref={fileInputRef}
-          type="file"
-          onChange={handleFileUpload}
-          className="hidden"
-          accept="image/*,application/pdf,.txt,.doc,.docx"
-        />
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          className="px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 hover:cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          title="Upload file or image"
-          disabled={isProcessing}
-        >
-          {isProcessing ? '⏳' : 'Upload Image / PDF to Get Started'}
-        </button>
-        {uploadedFile && (
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">
-              {uploadedFile.name}
-            </span>
+    <div className="h-full w-full flex flex-col items-center justify-center space-y-12">
+        <div className="flex flex-col items-center space-y-8">
+          <p className="text-6xl">hello</p>
+          <p>Whenever you're ready, upload your file and begin your learning!</p>
+        </div>
+
+        <div className="border-dashed border-4 border-paleSage rounded-4xl p-8  hover:bg-paleSage">
+          <div className="flex flex-col items-center gap-2 px-8">
+            <input
+              ref={fileInputRef}
+              type="file"
+              onChange={handleFileUpload}
+              className="hidden"
+              accept="image/*,application/pdf,.txt,.doc,.docx"
+            />
             <button
-              onClick={handleSend}
-              className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => fileInputRef.current?.click()}
+              className="p-4 rounded-lg hover:cursor-pointer hover:scale-105 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Upload file or image"
               disabled={isProcessing}
             >
-              {isProcessing ? 'Processing...' : 'Send'}
+              {isProcessing ? (
+                <span className="text-2xl">⏳</span>
+              ) : (
+                <Image 
+                  src={uploadIcon} 
+                  alt="Upload" 
+                  width={80} 
+                  height={80}
+                />
+              )}
             </button>
+            <p>Upload an image/pdf</p>
+            {uploadedFile && (
+              <div className="flex flex-col items-center gap-8">
+                <span className="text-xs text-deepbROWN italic">
+                  {uploadedFile.name}
+                </span>
+                <button
+                  onClick={handleSend}
+                  className="px-4 py-1 bg-darkSage text-creme hover:cursor-pointer hover:scale-105 rounded-4xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isProcessing}
+                >
+                  {isProcessing ? 'Processing...' : 'Upload'}
+                </button>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </div>
     </div>
   )
 }
