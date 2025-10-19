@@ -1,14 +1,29 @@
 'use client';
 
-import React, { useEffect, useState, Suspense } from 'react';
+import React, { useEffect, useState, Suspense, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { TranscribedText } from '@/types';
 import { ChatMessage } from '../components/ChatMessage';
+import { TextToSpeechPlayer } from '../utils/textToSpeech';
 import 'katex/dist/katex.min.css';
 
 function ScriptModeContent() {
   const searchParams = useSearchParams();
   const [result, setResult] = useState<TranscribedText | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const ttsPlayerRef = useRef<TextToSpeechPlayer | null>(null);
+
+  // Initialize TTS player
+  useEffect(() => {
+    ttsPlayerRef.current = new TextToSpeechPlayer();
+    return () => {
+      // Cleanup on unmount
+      if (ttsPlayerRef.current) {
+        ttsPlayerRef.current.stop();
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const key = searchParams.get('key');
@@ -39,6 +54,39 @@ function ScriptModeContent() {
     }
   }, [searchParams]);
 
+  const handleReadAloud = async () => {
+    if (!result?.content) {
+      setError('No content to read');
+      return;
+    }
+
+    const player = ttsPlayerRef.current;
+    if (!player) {
+      setError('Text-to-speech player not initialized');
+      return;
+    }
+
+    try {
+      setError(null);
+      
+      if (isPlaying) {
+        // Stop playback
+        player.stop();
+        setIsPlaying(false);
+      } else {
+        // Start playback
+        setIsPlaying(true);
+        await player.playText({ 
+          text: result.content,
+          onEnd: () => setIsPlaying(false)
+        });
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to play audio');
+      setIsPlaying(false);
+    }
+  };
+
   return (
     <div className="h-screen w-full flex items-center justify-center p-8 bg-gray-50">
       <div className="max-w-4xl w-full bg-white rounded-lg shadow-lg p-8">
@@ -50,10 +98,27 @@ function ScriptModeContent() {
                 <ChatMessage message={result} />
               </div>
             </div>
-            <div className='flex flex-col items-end justify-end'>
-              <button className='hover:cursor-pointer'>Read aloud</button>
-              <button>Chat Mode</button>
-              <button>Translate Mode</button>
+            <div className='flex flex-col items-end justify-end gap-2'>
+              <button 
+                onClick={handleReadAloud}
+                disabled={!result?.content}
+                className={`px-4 py-2 rounded transition-colors ${
+                  isPlaying 
+                    ? 'bg-red-500 hover:bg-red-600 text-white' 
+                    : 'bg-blue-500 hover:bg-blue-600 text-white disabled:bg-gray-300 disabled:cursor-not-allowed'
+                }`}
+              >
+                {isPlaying ? 'Stop Reading' : 'Read Aloud'}
+              </button>
+              {error && (
+                <p className="text-red-500 text-sm max-w-xs text-right">{error}</p>
+              )}
+              <button className='px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded'>
+                Chat Mode
+              </button>
+              <button className='px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded'>
+                Translate Mode
+              </button>
             </div>
           </div>
         ) : (
