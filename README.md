@@ -245,6 +245,12 @@ MIT (see `LICENSE`)
 
 ---
 
+## Our Team
+
+Kim Nguyen 
+Aidan Ly 
+Noha Haneen
+
 ### Appendix: Quick Facts
 
 * **Usefulness**: turns any real‑world text into immediate, level‑matched practice
