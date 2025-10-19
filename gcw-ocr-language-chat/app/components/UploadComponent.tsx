@@ -1,18 +1,39 @@
 "use client"
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import { TranscribedText } from '@/types';
 import { processOCR } from "../utils/ocrProcessor";
 import Image from 'next/image';
 import uploadIcon from '../src/uploadIcon.svg';
 
+const greetings = [
+  "hello",      // English
+  "hola",       // Spanish
+  "bonjour",    // French
+  "你好",       // Chinese
+  "مرحبا",      // Arabic
+  "こんにちは",  // Japanese
+  "안녕하세요",  // Korean
+  "ciao",       // Italian
+  "hallo",      // German
+  "olá",        // Portuguese
+];
 
 const UploadComponent = () => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null); 
   const [isProcessing, setIsProcessing] = useState(false);
+  const [greetingIndex, setGreetingIndex] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setGreetingIndex((prev) => (prev + 1) % greetings.length);
+    }, 2000);
+    
+    return () => clearInterval(interval);
+  }, []);
     
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -81,7 +102,9 @@ const UploadComponent = () => {
   return (
     <div className="h-full w-full flex flex-col items-center justify-center space-y-12">
         <div className="flex flex-col items-center space-y-8">
-          <p className="text-6xl text-deepbROWN">hello</p>
+          <p key={greetingIndex} className="text-6xl text-deepbROWN animate-fadeIn">
+            {greetings[greetingIndex]}
+          </p>
           <p className="text-deepbROWN">Whenever you're ready, upload your file and begin your learning!</p>
         </div>
 
