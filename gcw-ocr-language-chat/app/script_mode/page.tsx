@@ -91,12 +91,12 @@ function ScriptModeContent() {
 
   return (
     <div className="h-screen w-full flex items-center justify-center p-8 bg-gray-50">
-      <div className="max-w-4xl w-full bg-white rounded-lg shadow-lg p-8">
+      <div className="max-w-4xl w-full h-full max-h-[calc(100vh-4rem)] bg-white rounded-lg shadow-lg p-8 flex flex-col">
         {result ? (
-          <div className='flex justify-between'>
-            <div className='flex flex-col items-center'>
+          <div className='flex justify-between flex-1 min-h-0 gap-4'>
+            <div className='flex flex-col flex-1 min-h-0'>
               <h2 className="text-2xl font-bold mb-4 text-gray-800">Processed Result</h2>
-              <div className="pt-4">
+              <div className="flex-1 overflow-y-auto pr-2">
                 <ChatMessage message={result} />
               </div>
             </div>
