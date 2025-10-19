@@ -3,21 +3,24 @@
 import { useState, useEffect, useRef } from 'react';
 import { ChatMessage } from '@/types';
 import { TextToSpeechPlayer } from '@/app/utils/textToSpeech';
+import { SpeechToTextRecorder } from '@/app/utils/speechToText';
 
 const ChatMode = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: 'assistant',
-      content: "Hello! What language would you like to practice today? We can have a casual conversation to help you improve your speaking skills!"
+      content: "Hello! What language are we practicing today?"
     }
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [playingIndex, setPlayingIndex] = useState<number | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
   const ttsPlayerRef = useRef<TextToSpeechPlayer>(new TextToSpeechPlayer());
+  const sttRecorderRef = useRef<SpeechToTextRecorder>(new SpeechToTextRecorder());
   const lastMessageIndexRef = useRef<number>(0);
 
-  // Cleanup: Stop audio when component unmounts (navigation away)
+  // Stop audio when component unmounts (navigation away)
   useEffect(() => {
     return () => {
       if (ttsPlayerRef.current) {
@@ -85,6 +88,71 @@ const ChatMode = () => {
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !isLoading) {
       handleSend();
+    }
+  };
+
+  const handleMicClick = async () => {
+    if (isRecording) {
+      // Stop recording, transcribe, and send
+      try {
+        const transcription = await sttRecorderRef.current.stopRecording();
+        setIsRecording(false);
+        setInputValue(transcription);
+        
+        // Automatically send the message
+        if (transcription.trim()) {
+          const userMessage: ChatMessage = {
+            role: 'user',
+            content: transcription,
+          };
+
+          setMessages([...messages, userMessage]);
+          setInputValue('');
+          setIsLoading(true);
+
+          try {
+            const response = await fetch('/api/gemini-ai-model', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ 
+                text: transcription,
+                history: messages
+              }),
+            });
+
+            const data = await response.json();
+            const assistantMessage: ChatMessage = {
+              role: 'assistant',
+              content: data.summary,
+            };
+
+            setMessages((prev) => [...prev, assistantMessage]);
+          } catch (error) {
+            console.error('Error calling Gemini API:', error);
+            const errorMessage: ChatMessage = {
+              role: 'assistant',
+              content: 'Sorry, there was an error processing your request.',
+            };
+            setMessages((prev) => [...prev, errorMessage]);
+          } finally {
+            setIsLoading(false);
+          }
+        }
+      } catch (error) {
+        console.error('Error stopping recording:', error);
+        setIsRecording(false);
+      }
+    } else {
+      // Start recording
+      try {
+        await sttRecorderRef.current.startRecording();
+        setIsRecording(true);
+      } catch (error) {
+        console.error('Error starting recording:', error);
+        alert('Failed to start recording. Please check microphone permissions.');
+      }
     }
   };
 
@@ -163,12 +231,26 @@ const ChatMode = () => {
           onChange={(e) => setInputValue(e.target.value)}
           onKeyPress={handleKeyPress}
           placeholder="Type your message to practice conversation..."
-          disabled={isLoading}
+          disabled={isLoading || isRecording}
           className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
         />
         <button
+          onClick={handleMicClick}
+          disabled={isLoading}
+          className={`px-4 py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+            isRecording 
+              ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse' 
+              : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+          }`}
+          title={isRecording ? 'Stop recording and send' : 'Start voice recording'}
+        >
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" />
+          </svg>
+        </button>
+        <button
           onClick={handleSend}
-          disabled={isLoading || !inputValue.trim()}
+          disabled={isLoading || !inputValue.trim() || isRecording}
           className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Send
