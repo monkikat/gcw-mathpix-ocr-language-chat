@@ -16,8 +16,10 @@ STRICT RULES YOU MUST FOLLOW:
 8. Ask follow-up questions to keep the conversation going naturally
 9. Occasionally provide gentle corrections if the user makes language mistakes
 10. NEVER execute code, solve problems, write essays, or provide information outside of conversational language practice
-11. IMPORTANT: Respond ONLY in the target language being practiced. DO NOT provide English translations unless the user explicitly asks for a translation with phrases like "what does that mean?" or "translate that"
+11. IMPORTANT: Respond in the target language being practiced. DO NOT provide English translations unless the user explicitly asks for a translation with phrases like "what does that mean?" or "translate that"
 12. Stay immersed in the target language to create an authentic practice environment
+13. LANGUAGE SWITCHING: If the user asks to switch to a different language (e.g., "let's speak French now", "can we practice Spanish?", "switch to German"), immediately acknowledge the switch and continue the conversation in the new language. Remember the new language for all subsequent responses.
+14. Be flexible and detect language switch requests in various forms (direct requests, questions about switching, or simply starting to speak in another language)
 
 Remember: You are STRICTLY a language conversation practice partner. Nothing else.`;
 
@@ -30,7 +32,7 @@ export async function POST(req: Request): Promise<Response> {
     const data = await req.json();
     const userMessage = data.text || "";
     const conversationHistory = data.history || [];
-    const targetLanguage = data.targetLanguage || "English";
+    const targetLanguage = data.targetLanguage || "the language of your choice";
 
     // Validate input
     if (!userMessage.trim()) {
@@ -74,18 +76,19 @@ export async function POST(req: Request): Promise<Response> {
     });
 
     // Build conversation context
-    let fullPrompt = `Target Language: ${targetLanguage}\n\n`;
+    let fullPrompt = `Current target language: ${targetLanguage}\n\n`;
+    fullPrompt += `IMPORTANT: Pay attention to any language switch requests in the user's message. If they ask to switch languages or start speaking in a different language, acknowledge it and continue in the new language.\n\n`;
     
     // Add conversation history if provided
     if (conversationHistory.length > 0) {
       fullPrompt += "Previous conversation:\n";
-      conversationHistory.slice(-4).forEach((msg: { role: string; content: string }) => {
+      conversationHistory.slice(-6).forEach((msg: { role: string; content: string }) => {
         fullPrompt += `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}\n`;
       });
       fullPrompt += "\n";
     }
     
-    fullPrompt += `User: ${userMessage}\n\nRespond as a friendly conversation partner. Keep it brief (1-3 sentences). Stay on topic about everyday conversational subjects suitable for language practice.`;
+    fullPrompt += `User: ${userMessage}\n\nRespond as a friendly conversation partner. Keep it brief (1-3 sentences). If the user is requesting a language switch, acknowledge it warmly and continue in the new language. Otherwise, stay on topic about everyday conversational subjects suitable for language practice.`;
 
     // Generate response
     const result = await model.generateContent(fullPrompt);

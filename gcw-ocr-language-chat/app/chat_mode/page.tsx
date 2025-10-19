@@ -1,17 +1,43 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ChatMessage } from '@/types';
+import { TextToSpeechPlayer } from '@/app/utils/textToSpeech';
 
 const ChatMode = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: 'assistant',
-      content: "Hello! 👋 What language would you like to practice today? We can have a casual conversation to help you improve your speaking skills!"
+      content: "Hello! What language would you like to practice today? We can have a casual conversation to help you improve your speaking skills!"
     }
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [playingIndex, setPlayingIndex] = useState<number | null>(null);
+  const ttsPlayerRef = useRef<TextToSpeechPlayer>(new TextToSpeechPlayer());
+  const lastMessageIndexRef = useRef<number>(0);
+
+  // Cleanup: Stop audio when component unmounts (navigation away)
+  useEffect(() => {
+    return () => {
+      if (ttsPlayerRef.current) {
+        ttsPlayerRef.current.stop();
+      }
+    };
+  }, []);
+
+  const handlePlayAudio = async (text: string, index: number) => {
+    try {
+      setPlayingIndex(index);
+      await ttsPlayerRef.current.playText({
+        text,
+        onEnd: () => setPlayingIndex(null),
+      });
+    } catch (error) {
+      console.error('Error playing audio:', error);
+      setPlayingIndex(null);
+    }
+  };
 
   const handleSend = async () => {
     if (inputValue.trim() && !isLoading) {
@@ -62,6 +88,17 @@ const ChatMode = () => {
     }
   };
 
+  // Auto-play new AI messages
+  useEffect(() => {
+    const lastMessage = messages[messages.length - 1];
+    const isNewMessage = messages.length > lastMessageIndexRef.current;
+    
+    if (isNewMessage && lastMessage?.role === 'assistant' && !isLoading) {
+      lastMessageIndexRef.current = messages.length;
+      handlePlayAudio(lastMessage.content, messages.length - 1);
+    }
+  }, [messages, isLoading]);
+
   return (
     <div className="h-screen w-full flex flex-col p-8">
       {/* Chat messages area */}
@@ -83,9 +120,28 @@ const ChatMode = () => {
                   message.role === 'user'
                     ? 'bg-blue-500 text-white'
                     : 'bg-gray-100 text-gray-800'
-                }`}
+                } relative`}
               >
                 <div className="whitespace-pre-wrap">{message.content}</div>
+                {message.role === 'assistant' && (
+                  <button
+                    onClick={() => handlePlayAudio(message.content, index)}
+                    disabled={playingIndex === index}
+                    className="absolute bottom-2 right-2 p-1.5 rounded-full hover:bg-gray-200 transition-colors disabled:opacity-50"
+                    title="Replay audio"
+                    aria-label="Replay audio"
+                  >
+                    {playingIndex === index ? (
+                      <svg className="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                    ) : (
+                      <svg className="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                  </button>
+                )}
               </div>
             </div>
           ))
