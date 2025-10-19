@@ -169,7 +169,7 @@ const ChatMode = () => {
   }, [messages, isLoading]);
 
   return (
-    <div className="h-screen w-full flex flex-col">
+    <div className="h-screen w-full flex flex-col pt-18">
       <NavBar />
       <div className="flex-1 flex flex-col p-8">
         {/* Chat messages area */}

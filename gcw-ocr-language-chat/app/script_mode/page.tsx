@@ -5,7 +5,6 @@ import { useSearchParams } from 'next/navigation';
 import { TranscribedText } from '@/types';
 import { TextToSpeechPlayer } from '../utils/textToSpeech';
 import 'katex/dist/katex.min.css';
-import { useRouter } from 'next/navigation';
 import NavBar from '../components/navigation/NavBar';
 
 function ScriptModeContent() {
@@ -14,7 +13,6 @@ function ScriptModeContent() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const ttsPlayerRef = useRef<TextToSpeechPlayer | null>(null);
-  const router = useRouter();
 
   // Initialize TTS player
   useEffect(() => {

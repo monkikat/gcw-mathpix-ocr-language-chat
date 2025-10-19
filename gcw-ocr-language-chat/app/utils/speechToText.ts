@@ -34,18 +34,22 @@ export class SpeechToTextRecorder {
       };
 
       this.mediaRecorder.start();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error starting recording:', error);
       
       // Provide helpful error messages
-      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-        throw new Error('Microphone permission denied. Please allow microphone access in your browser settings and try again.');
-      } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
-        throw new Error('No microphone found. Please connect a microphone and try again.');
-      } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
-        throw new Error('Microphone is already in use by another application. Please close other apps using the microphone.');
+      if (error instanceof Error) {
+        if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+          throw new Error('Microphone permission denied. Please allow microphone access in your browser settings and try again.');
+        } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+          throw new Error('No microphone found. Please connect a microphone and try again.');
+        } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
+          throw new Error('Microphone is already in use by another application. Please close other apps using the microphone.');
+        } else {
+          throw new Error(`Failed to start recording: ${error.message}`);
+        }
       } else {
-        throw new Error(`Failed to start recording: ${error.message}`);
+        throw new Error('Failed to start recording: Unknown error');
       }
     }
   }

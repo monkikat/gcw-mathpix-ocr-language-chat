@@ -154,9 +154,9 @@ export default function TranslateModePage() {
         await sttRecorderRef.current.startRecording();
         setIsRecording(true);
         setError("");
-      } catch (error: any) {
+      } catch (error) {
         console.error("Error starting recording:", error);
-        setError(error.message || "Failed to start recording. Please check microphone permissions.");
+        setError(error instanceof Error ? error.message : "Failed to start recording. Please check microphone permissions.");
       }
     }
   };

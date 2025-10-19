@@ -105,7 +105,7 @@ const UploadComponent = () => {
           <p key={greetingIndex} className="text-6xl text-deepbROWN animate-fadeIn">
             {greetings[greetingIndex]}
           </p>
-          <p className="text-deepbROWN">Whenever you're ready, upload your file and begin your learning!</p>
+          <p className="text-deepbROWN">Whenever you&apos;re ready, upload your file and begin your learning!</p>
         </div>
 
         <div className="border-dashed border-4 border-paleSage rounded-4xl p-8 hover:bg-paleSage hover:border-darkSage transition-all duration-300 ease-in-out hover:shadow-lg">
