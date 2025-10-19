@@ -1,0 +1,74 @@
+'use client';
+
+import React, { useEffect, useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { TranscribedText } from '@/types';
+import { ChatMessage } from '../components/ChatMessage';
+import 'katex/dist/katex.min.css';
+
+function ScriptModeContent() {
+  const searchParams = useSearchParams();
+  const [result, setResult] = useState<TranscribedText | null>(null);
+
+  useEffect(() => {
+    const key = searchParams.get('key');
+    const data = searchParams.get('data');
+    
+    if (key) {
+      // Get from localStorage using key (for OCR results - persists on refresh)
+      try {
+        const stored = localStorage.getItem(key);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          setResult(parsed);
+          // Optionally clean up after retrieving (comment out to keep data permanently)
+          // localStorage.removeItem(key);
+        }
+      } catch (error) {
+        console.error('Error parsing data from localStorage:', error);
+      }
+    } else if (data) {
+      // Fallback to URL parameter (Base64) for text files
+      try {
+        const decoded = Buffer.from(data, 'base64').toString('utf-8');
+        const parsed = JSON.parse(decoded);
+        setResult(parsed);
+      } catch (error) {
+        console.error('Error parsing data from URL:', error);
+      }
+    }
+  }, [searchParams]);
+
+  return (
+    <div className="h-screen w-full flex items-center justify-center p-8 bg-gray-50">
+      <div className="max-w-4xl w-full bg-white rounded-lg shadow-lg p-8">
+        {result ? (
+          <div>
+            <h2 className="text-2xl font-bold mb-4 text-gray-800">Processed Result</h2>
+            <div className="border-t pt-4">
+              <ChatMessage message={result} />
+            </div>
+          </div>
+        ) : (
+          <div className="text-center text-gray-400">
+            <p>No data to display</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+const Page = () => {
+  return (
+    <Suspense fallback={
+      <div className="h-screen w-full flex items-center justify-center">
+        <p>Loading...</p>
+      </div>
+    }>
+      <ScriptModeContent />
+    </Suspense>
+  );
+};
+
+export default Page;

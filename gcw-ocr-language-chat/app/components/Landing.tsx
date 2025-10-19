@@ -1,16 +1,13 @@
 'use client';
 
 import { useState, useRef } from 'react';
-
-type Message = {
-  type: 'text' | 'file' | 'system';
-  content: string;
-  fileName?: string;
-  fileType?: string;
-};
+import { ChatMessage } from './ChatMessage';
+import { processOCR } from '../utils/ocrProcessor';
+import 'katex/dist/katex.min.css';
+import { TranscribedText } from '@/types';
 
 const Landing = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<TranscribedText[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -48,50 +45,8 @@ const Landing = () => {
 
       // Process OCR for images and PDFs
       if (shouldProcessOCR) {
-        try {
-          const formData = new FormData();
-          formData.append('file', file);
-
-          const endpoint = file.type === 'application/pdf' 
-            ? '/api/ocr/pdf' 
-            : '/api/ocr/image';
-
-          const response = await fetch(endpoint, {
-            method: 'POST',
-            body: formData,
-          });
-
-          const data = await response.json();
-
-          if (data.success && data.text) {
-            // Add system message with OCR result
-            setMessages([
-              ...newMessages,
-              {
-                type: 'system',
-                content: data.text,
-                fileName: `OCR Result (${Math.round(data.confidence * 100)}% confidence)`,
-              },
-            ]);
-          } else {
-            setMessages([
-              ...newMessages,
-              {
-                type: 'system',
-                content: `Error: ${data.error || 'OCR processing failed'}`,
-              },
-            ]);
-          }
-        } catch (error) {
-          console.error('OCR error:', error);
-          setMessages([
-            ...newMessages,
-            {
-              type: 'system',
-              content: `Error: Failed to process file with OCR`,
-            },
-          ]);
-        }
+        const updatedMessages = await processOCR(file, newMessages);
+        setMessages(updatedMessages);
       }
 
       setIsProcessing(false);
@@ -109,81 +64,30 @@ const Landing = () => {
     }
   };
 
+  // if enter clicked, send message
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       handleSend();
     }
   };
 
-  const renderMessage = (message: Message, index: number) => {
-    if (message.type === 'system') {
-      return (
-        <div
-          key={index}
-          className="bg-gray-100 text-gray-800 rounded-lg p-3 max-w-md"
-        >
-          {message.fileName && (
-            <p className="text-xs font-semibold mb-2 text-gray-600">
-              {message.fileName}
-            </p>
-          )}
-          <p className="whitespace-pre-wrap">{message.content}</p>
-        </div>
-      );
-    }
-
-    if (message.type === 'text') {
-      return (
-        <div
-          key={index}
-          className="bg-blue-500 text-white rounded-lg p-3 max-w-md ml-auto"
-        >
-          {message.content}
-        </div>
-      );
-    }
-
-    if (message.fileType?.startsWith('image/')) {
-      return (
-        <div
-          key={index}
-          className="bg-blue-500 text-white rounded-lg p-3 max-w-md ml-auto"
-        >
-          <p className="text-sm mb-2">{message.fileName}</p>
-          <img
-            src={message.content}
-            alt={message.fileName}
-            className="max-w-full rounded"
-          />
-        </div>
-      );
-    }
-
-    return (
-      <div
-        key={index}
-        className="bg-blue-500 text-white rounded-lg p-3 max-w-md ml-auto"
-      >
-        <p className="text-sm mb-1">📎 {message.fileName}</p>
-        <p className="text-xs opacity-75">File uploaded</p>
-      </div>
-    );
-  };
 
   return (
     <div className="h-full w-full flex flex-col p-8">
-      {/* Chat Messages Area */}
+      {/* Chat messages area */}
       <div className="flex-1 overflow-y-auto mb-4 space-y-3">
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full text-gray-400">
             Start a conversation...
           </div>
         ) : (
-          messages.map(renderMessage)
+          messages.map((message, index) => (
+            <ChatMessage key={index} message={message} />
+          ))
         )}
       </div>
 
-      {/* Input Field at Bottom */}
+      {/* Input field */}
       <div className="flex gap-2">
         <input
           ref={fileInputRef}
