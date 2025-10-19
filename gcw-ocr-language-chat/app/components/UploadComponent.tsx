@@ -81,11 +81,11 @@ const UploadComponent = () => {
   return (
     <div className="h-full w-full flex flex-col items-center justify-center space-y-12">
         <div className="flex flex-col items-center space-y-8">
-          <p className="text-6xl">hello</p>
-          <p>Whenever you're ready, upload your file and begin your learning!</p>
+          <p className="text-6xl text-deepbROWN">hello</p>
+          <p className="text-deepbROWN">Whenever you're ready, upload your file and begin your learning!</p>
         </div>
 
-        <div className="border-dashed border-4 border-paleSage rounded-4xl p-8  hover:bg-paleSage">
+        <div className="border-dashed border-4 border-paleSage rounded-4xl p-8 hover:bg-paleSage hover:border-darkSage transition-all duration-300 ease-in-out hover:shadow-lg">
           <div className="flex flex-col items-center gap-2 px-8">
             <input
               ref={fileInputRef}
@@ -96,7 +96,7 @@ const UploadComponent = () => {
             />
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="p-4 rounded-lg hover:cursor-pointer hover:scale-105 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-4 rounded-lg hover:scale-110 transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
               title="Upload file or image"
               disabled={isProcessing}
             >
@@ -108,18 +108,19 @@ const UploadComponent = () => {
                   alt="Upload" 
                   width={80} 
                   height={80}
+                  className="transition-transform duration-300 ease-in-out"
                 />
               )}
             </button>
-            <p>Upload an image/pdf</p>
+            <p className="text-deepbROWN">Upload an image/pdf</p>
             {uploadedFile && (
-              <div className="flex flex-col items-center gap-8">
+              <div className="flex flex-col items-center gap-8 animate-fadeIn">
                 <span className="text-xs text-deepbROWN italic">
                   {uploadedFile.name}
                 </span>
                 <button
                   onClick={handleSend}
-                  className="px-4 py-1 bg-darkSage text-creme hover:cursor-pointer hover:scale-105 rounded-4xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-1 bg-darkSage text-creme hover:bg-darkSage/90 hover:scale-105 rounded-4xl transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg"
                   disabled={isProcessing}
                 >
                   {isProcessing ? 'Processing...' : 'Upload'}
