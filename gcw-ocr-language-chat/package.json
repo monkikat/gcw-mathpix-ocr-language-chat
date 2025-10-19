@@ -12,6 +12,7 @@
     "@elevenlabs/react": "^0.8.0",
     "@google/generative-ai": "^0.24.1",
     "@tailwindcss/typography": "^0.5.19",
+    "form-data": "^4.0.4",
     "katex": "^0.16.25",
     "next": "15.5.6",
     "react": "19.1.0",
@@ -23,6 +24,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@types/form-data": "^2.5.2",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
