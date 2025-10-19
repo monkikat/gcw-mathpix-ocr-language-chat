@@ -1,5 +1,3 @@
-import Image from "next/image";
-import Landing from "./components/Landing";
 import UploadComponent from "./components/UploadComponent";
 
 export default function Home() {

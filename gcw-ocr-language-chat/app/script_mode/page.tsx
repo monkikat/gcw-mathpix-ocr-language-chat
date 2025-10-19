@@ -43,10 +43,17 @@ function ScriptModeContent() {
     <div className="h-screen w-full flex items-center justify-center p-8 bg-gray-50">
       <div className="max-w-4xl w-full bg-white rounded-lg shadow-lg p-8">
         {result ? (
-          <div>
-            <h2 className="text-2xl font-bold mb-4 text-gray-800">Processed Result</h2>
-            <div className="border-t pt-4">
-              <ChatMessage message={result} />
+          <div className='flex justify-between'>
+            <div className='flex flex-col items-center'>
+              <h2 className="text-2xl font-bold mb-4 text-gray-800">Processed Result</h2>
+              <div className="pt-4">
+                <ChatMessage message={result} />
+              </div>
+            </div>
+            <div className='flex flex-col items-end justify-end'>
+              <button className='hover:cursor-pointer'>Read aloud</button>
+              <button>Chat Mode</button>
+              <button>Translate Mode</button>
             </div>
           </div>
         ) : (
