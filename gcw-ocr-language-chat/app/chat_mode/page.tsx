@@ -4,7 +4,12 @@ import { useState } from 'react';
 import { ChatMessage } from '@/types';
 
 const ChatMode = () => {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    {
+      role: 'assistant',
+      content: "Hello! 👋 What language would you like to practice today? We can have a casual conversation to help you improve your speaking skills!"
+    }
+  ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -25,7 +30,10 @@ const ChatMode = () => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ text: inputValue }),
+          body: JSON.stringify({ 
+            text: inputValue,
+            history: messages
+          }),
         });
 
         const data = await response.json();
@@ -98,7 +106,7 @@ const ChatMode = () => {
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyPress={handleKeyPress}
-          placeholder="Ask Gemini AI anything..."
+          placeholder="Type your message to practice conversation..."
           disabled={isLoading}
           className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
         />
