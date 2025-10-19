@@ -12,7 +12,8 @@ const ModesClient = () => {
   return (
     <div className='space-y-8 p-8'>
         <div className="w-fit">
-            <button className="bg-lightSage rounded-4xl px-4 py-1 hover:bg-darkSage hover:text-creme text-deepbROWN transition-all duration-300 ease-in-out hover:shadow-lg">Back</button>
+            <button onClick={() => router.push('/')}
+            className="bg-lightSage rounded-4xl px-4 py-1 hover:bg-darkSage hover:text-creme text-deepbROWN transition-all duration-300 ease-in-out hover:shadow-lg">Back</button>
         </div>
         <div className="flex justify-between w-full space-x-12 ">
             <div className="bg-paleSage space-y-4 rounded-4xl px-4 py-12 flex flex-col items-center text-deepbROWN flex-1 transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-1">
