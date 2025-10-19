@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import FormData from 'form-data';
 
 export async function POST(req: NextRequest) {
   console.log('Speech-to-text API called');
@@ -34,12 +33,10 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(arrayBuffer);
     console.log('Audio converted to buffer:', buffer.length, 'bytes');
 
-    // Prepare FormData for ElevenLabs API using form-data package
+    // Prepare FormData for ElevenLabs API
     const elevenLabsFormData = new FormData();
-    elevenLabsFormData.append('file', buffer, {
-      filename: 'audio.webm',
-      contentType: 'audio/webm'
-    });
+    const blob = new Blob([buffer], { type: 'audio/webm' });
+    elevenLabsFormData.append('file', blob, 'audio.webm');
     elevenLabsFormData.append('model_id', 'scribe_v1');
     
     console.log('Sending request to ElevenLabs...');
@@ -47,9 +44,8 @@ export async function POST(req: NextRequest) {
       method: 'POST',
       headers: {
         'xi-api-key': apiKey,
-        ...elevenLabsFormData.getHeaders(),
       },
-      body: elevenLabsFormData.getBuffer(),
+      body: elevenLabsFormData,
     });
 
     console.log('ElevenLabs response status:', response.status);
